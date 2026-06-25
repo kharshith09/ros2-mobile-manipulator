@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ============================================================
+       ros2_control hardware for the 5 arm joints.
+       sim_mode arg selects the hardware backend.
+       gazebo uses gz_ros2_control (full physics sim).
+       mock uses mock_components/GenericSystem (RViz-only, no physics, fast).
+       ============================================================ -->
+
+  <xacro:arg name="sim_mode" default="gazebo"/>
+  <xacro:property name="sim_mode" value="$(arg sim_mode)"/>
+
+  <xacro:macro name="arm_joint_iface" params="name">
+    <joint name="${name}">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+
+  <ros2_control name="RobotSystem" type="system">
+    <hardware>
+      <xacro:if value="${sim_mode == 'mock'}">
+        <plugin>mock_components/GenericSystem</plugin>
+      </xacro:if>
+      <xacro:unless value="${sim_mode == 'mock'}">
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </xacro:unless>
+    </hardware>
+    <xacro:arm_joint_iface name="shoulder_pan_joint"/>
+    <xacro:arm_joint_iface name="shoulder_lift_joint"/>
+    <xacro:arm_joint_iface name="elbow_joint"/>
+    <xacro:arm_joint_iface name="wrist_pitch_joint"/>
+    <xacro:arm_joint_iface name="wrist_roll_joint"/>
+  </ros2_control>
+
+  <!-- gz_ros2_control plugin (Gazebo only) - starts a controller_manager
+       inside Gazebo and loads the controllers from this YAML. -->
+  <xacro:unless value="${sim_mode == 'mock'}">
+    <gazebo>
+      <plugin filename="gz_ros2_control-system"
+              name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>$(find bot_description)/config/arm_controllers.yaml</parameters>
+      </plugin>
+    </gazebo>
+  </xacro:unless>
+
+</robot>

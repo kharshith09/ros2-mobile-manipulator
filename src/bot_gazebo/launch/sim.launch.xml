@@ -1,0 +1,36 @@
+<launch>
+  <arg name="rviz" default="true"/>
+
+  <let name="urdf_path"  value="$(find-pkg-share bot_description)/urdf/bot.urdf.xacro"/>
+  <let name="world_path" value="$(find-pkg-share bot_gazebo)/worlds/empty.sdf"/>
+  <let name="bridge_cfg" value="$(find-pkg-share bot_gazebo)/config/gz_bridge.yaml"/>
+  <let name="rviz_cfg"   value="$(find-pkg-share bot_description)/rviz/bot.rviz"/>
+
+  <node pkg="robot_state_publisher" exec="robot_state_publisher" output="screen">
+    <param name="robot_description" value="$(command 'xacro $(var urdf_path)')"/>
+    <param name="use_sim_time" value="true"/>
+    <param name="publish_frequency" value="50.0"/>
+  </node>
+
+  <include file="$(find-pkg-share ros_gz_sim)/launch/gz_sim.launch.py">
+    <arg name="gz_args" value="-s -r -v 4 $(var world_path)"/>
+  </include>
+
+  <node pkg="ros_gz_sim" exec="create" output="screen"
+        args="-topic robot_description -name bot -z 0.1"/>
+
+  <node pkg="ros_gz_bridge" exec="parameter_bridge" output="screen">
+    <param name="config_file" value="$(var bridge_cfg)"/>
+    <param name="use_sim_time" value="true"/>
+  </node>
+
+  <!-- Arm controller (gz_ros2_control starts the controller_manager inside Gazebo) -->
+  <node pkg="controller_manager" exec="spawner" output="screen"
+        args="arm_controller --controller-manager-timeout 60">
+    <param name="use_sim_time" value="true"/>
+  </node>
+
+  <node pkg="rviz2" exec="rviz2" output="screen" args="-d $(var rviz_cfg)" if="$(var rviz)">
+    <param name="use_sim_time" value="true"/>
+  </node>
+</launch>

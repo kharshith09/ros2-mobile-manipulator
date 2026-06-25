@@ -1,0 +1,23 @@
+# ROS 2 colcon build artifacts
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Gazebo / sim runtime
+*.log
+.gazebo/
+
+# Keep demo media (tracked intentionally) but ignore stray captures
+/scratch/

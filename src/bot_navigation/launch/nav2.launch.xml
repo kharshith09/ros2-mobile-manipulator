@@ -1,0 +1,42 @@
+<launch>
+
+  <!-- Paths -->
+  <let name="map"    value="$(find-pkg-share bot_navigation)/maps/colorful_house_map.yaml"/>
+  <let name="params" value="$(find-pkg-share bot_navigation)/config/nav2_params.yaml"/>
+
+  <!-- Map Server -->
+  <node pkg="nav2_map_server" exec="map_server" output="screen">
+    <param name="yaml_filename" value="$(var map)"/>
+    <param name="use_sim_time"  value="true"/>
+  </node>
+
+  <!-- AMCL -->
+  <node pkg="nav2_amcl" exec="amcl" output="screen">
+    <param from="$(var params)"/>
+  </node>
+
+  <!-- Planner Server -->
+  <node pkg="nav2_planner" exec="planner_server" output="screen">
+    <param from="$(var params)"/>
+  </node>
+
+  <!-- Controller Server -->
+  <node pkg="nav2_controller" exec="controller_server" output="screen">
+    <param from="$(var params)"/>
+  </node>
+
+  <!-- BT Navigator -->
+  <node pkg="nav2_bt_navigator" exec="bt_navigator" output="screen">
+    <param from="$(var params)"/>
+    <param name="default_nav_to_pose_bt_xml" value="/opt/ros/jazzy/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_only_if_path_becomes_invalid.xml"/>
+    <param name="default_nav_through_poses_bt_xml" value="/opt/ros/jazzy/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_only_if_path_becomes_invalid.xml"/>
+  </node>
+
+  <!-- Lifecycle Manager -->
+  <node pkg="nav2_lifecycle_manager" exec="lifecycle_manager" output="screen">
+    <param name="use_sim_time" value="true"/>
+    <param name="autostart"    value="true"/>
+    <param name="node_names"   value="[map_server, amcl, planner_server, controller_server, bt_navigator]"/>
+  </node>
+
+</launch>

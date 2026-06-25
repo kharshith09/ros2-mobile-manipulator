@@ -1,0 +1,554 @@
+<?xml version="1.0"?>
+<sdf version="1.10">
+
+<world name="colorful_house">
+
+  <!-- 250 Hz physics (0.004s step) instead of the 1000 Hz default.
+       Big RTF win for a wheeled and arm robot; accuracy stays fine for a demo. -->
+  <physics name="250hz" type="ignored">
+    <max_step_size>0.004</max_step_size>
+    <real_time_factor>1.0</real_time_factor>
+  </physics>
+
+  <plugin filename="gz-sim-physics-system"        name="gz::sim::systems::Physics"/>
+  <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+  <plugin filename="gz-sim-user-commands-system"  name="gz::sim::systems::UserCommands"/>
+  <plugin filename="gz-sim-sensors-system"        name="gz::sim::systems::Sensors">
+    <render_engine>ogre2</render_engine>
+  </plugin>
+
+  <!-- ── Atmosphere ──────────────────────────────────────────────── -->
+  <atmosphere type="adiabatic"/>
+
+  <!-- ── Lighting (single directional, no shadows = max perf) ─────── -->
+  <light type="directional" name="sun">
+    <cast_shadows>false</cast_shadows>
+    <pose>0 0 20 0 0 0</pose>
+    <diffuse>1.0 0.95 0.85 1</diffuse>
+    <specular>0.3 0.28 0.24 1</specular>
+    <direction>-0.4 0.15 -0.9</direction>
+  </light>
+
+  <!-- ── Floor  (warm parquet) ───────────────────────────────────── -->
+  <model name="floor">
+    <static>true</static>
+    <link name="link">
+      <collision name="col">
+        <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+      </collision>
+      <visual name="vis">
+        <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        <material>
+          <ambient>0.72 0.58 0.42 1</ambient>
+          <diffuse>0.72 0.58 0.42 1</diffuse>
+          <specular>0.25 0.20 0.12 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       OUTER WALLS  (14 m × 12 m room, 3 m tall, cream/linen colour)
+       ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- North wall  y=+6 -->
+  <model name="wall_north">
+    <static>true</static><pose>0 6 1.5 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>14 0.2 3</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>14 0.2 3</size></box></geometry>
+        <material>
+          <ambient>0.96 0.94 0.88 1</ambient>
+          <diffuse>0.96 0.94 0.88 1</diffuse>
+          <specular>0.15 0.15 0.12 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- South wall  y=-6 -->
+  <model name="wall_south">
+    <static>true</static><pose>0 -6 1.5 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>14 0.2 3</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>14 0.2 3</size></box></geometry>
+        <material>
+          <ambient>0.96 0.94 0.88 1</ambient>
+          <diffuse>0.96 0.94 0.88 1</diffuse>
+          <specular>0.15 0.15 0.12 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- West wall  x=-7 -->
+  <model name="wall_west">
+    <static>true</static><pose>-7 0 1.5 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.2 12 3</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.2 12 3</size></box></geometry>
+        <material>
+          <ambient>0.96 0.94 0.88 1</ambient>
+          <diffuse>0.96 0.94 0.88 1</diffuse>
+          <specular>0.15 0.15 0.12 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- East wall  x=+7 -->
+  <model name="wall_east">
+    <static>true</static><pose>7 0 1.5 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.2 12 3</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.2 12 3</size></box></geometry>
+        <material>
+          <ambient>0.96 0.94 0.88 1</ambient>
+          <diffuse>0.96 0.94 0.88 1</diffuse>
+          <specular>0.15 0.15 0.12 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       INNER DIVIDER WALL  x=0.5 with a 2.2 m doorway gap at y=0
+       North segment: y=1.1 → y=6    South segment: y=-6 → y=-1.1
+       ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- inner wall – north segment -->
+  <model name="inner_wall_north">
+    <static>true</static><pose>0.5 3.55 1.5 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.2 4.9 3</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.2 4.9 3</size></box></geometry>
+        <material>
+          <ambient>0.88 0.82 0.72 1</ambient>
+          <diffuse>0.88 0.82 0.72 1</diffuse>
+          <specular>0.1 0.1 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- inner wall – south segment -->
+  <model name="inner_wall_south">
+    <static>true</static><pose>0.5 -3.55 1.5 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.2 4.9 3</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.2 4.9 3</size></box></geometry>
+        <material>
+          <ambient>0.88 0.82 0.72 1</ambient>
+          <diffuse>0.88 0.82 0.72 1</diffuse>
+          <specular>0.1 0.1 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- doorway lintel (visual-only header above the gap) -->
+  <model name="doorway_lintel">
+    <static>true</static><pose>0.5 0 2.65 0 0 0</pose>
+    <link name="link">
+      <visual name="vis">
+        <geometry><box><size>0.2 2.2 0.7</size></box></geometry>
+        <material>
+          <ambient>0.75 0.65 0.50 1</ambient>
+          <diffuse>0.75 0.65 0.50 1</diffuse>
+          <specular>0.1 0.1 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       WEST ROOM — living / lounge area
+       ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- Sofa  (deep teal) -->
+  <model name="sofa_body">
+    <static>true</static><pose>-4.5 0 0.45 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>2.2 0.85 0.9</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>2.2 0.85 0.9</size></box></geometry>
+        <material>
+          <ambient>0.10 0.46 0.54 1</ambient>
+          <diffuse>0.10 0.46 0.54 1</diffuse>
+          <specular>0.3 0.3 0.3 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Sofa back-rest -->
+  <model name="sofa_back">
+    <static>true</static><pose>-4.5 -0.55 0.85 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>2.2 0.25 0.8</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>2.2 0.25 0.8</size></box></geometry>
+        <material>
+          <ambient>0.08 0.38 0.46 1</ambient>
+          <diffuse>0.08 0.38 0.46 1</diffuse>
+          <specular>0.3 0.3 0.3 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Coffee table  (white marble top) -->
+  <model name="coffee_table_top">
+    <static>true</static><pose>-4.5 1.4 0.38 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>1.0 0.55 0.06</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>1.0 0.55 0.06</size></box></geometry>
+        <material>
+          <ambient>0.94 0.94 0.94 1</ambient>
+          <diffuse>0.94 0.94 0.94 1</diffuse>
+          <specular>0.7 0.7 0.7 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Coffee table legs -->
+  <model name="coffee_table_legs">
+    <static>true</static><pose>-4.5 1.4 0.18 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.9 0.45 0.36</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.9 0.45 0.36</size></box></geometry>
+        <material>
+          <ambient>0.22 0.22 0.22 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- TV / media stand  (charcoal) -->
+  <model name="tv_stand">
+    <static>true</static><pose>-6.6 0 0.4 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.3 2.0 0.8</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.3 2.0 0.8</size></box></geometry>
+        <material>
+          <ambient>0.18 0.18 0.20 1</ambient>
+          <diffuse>0.18 0.18 0.20 1</diffuse>
+          <specular>0.6 0.6 0.6 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- TV screen  (dark slate) -->
+  <model name="tv_screen">
+    <static>true</static><pose>-6.7 0 1.2 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.08 1.4 0.85</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.08 1.4 0.85</size></box></geometry>
+        <material>
+          <ambient>0.05 0.05 0.08 1</ambient>
+          <diffuse>0.05 0.05 0.08 1</diffuse>
+          <specular>0.9 0.9 0.9 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Rug  (terracotta-red, raised 1 mm) -->
+  <model name="rug">
+    <static>true</static><pose>-4.5 0.5 0.005 0 0 0</pose>
+    <link name="link">
+      <visual name="vis">
+        <geometry><box><size>3.0 2.5 0.01</size></box></geometry>
+        <material>
+          <ambient>0.72 0.22 0.18 1</ambient>
+          <diffuse>0.72 0.22 0.18 1</diffuse>
+          <specular>0.05 0.05 0.05 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Plant NW  (terracotta pot + green foliage) -->
+  <model name="plant_nw_pot">
+    <static>true</static><pose>-6.2 4.8 0.2 0 0 0</pose>
+    <link name="link">
+      <collision name="col">
+        <geometry><cylinder><radius>0.18</radius><length>0.4</length></cylinder></geometry>
+      </collision>
+      <visual name="vis">
+        <geometry><cylinder><radius>0.18</radius><length>0.4</length></cylinder></geometry>
+        <material>
+          <ambient>0.72 0.36 0.20 1</ambient>
+          <diffuse>0.72 0.36 0.20 1</diffuse>
+          <specular>0.1 0.1 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <model name="plant_nw_foliage">
+    <static>true</static><pose>-6.2 4.8 0.75 0 0 0</pose>
+    <link name="link">
+      <collision name="col">
+        <geometry><sphere><radius>0.32</radius></sphere></geometry>
+      </collision>
+      <visual name="vis">
+        <geometry><sphere><radius>0.32</radius></sphere></geometry>
+        <material>
+          <ambient>0.15 0.58 0.22 1</ambient>
+          <diffuse>0.15 0.58 0.22 1</diffuse>
+          <specular>0.05 0.12 0.05 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Plant SW -->
+  <model name="plant_sw_pot">
+    <static>true</static><pose>-6.2 -4.8 0.2 0 0 0</pose>
+    <link name="link">
+      <collision name="col">
+        <geometry><cylinder><radius>0.18</radius><length>0.4</length></cylinder></geometry>
+      </collision>
+      <visual name="vis">
+        <geometry><cylinder><radius>0.18</radius><length>0.4</length></cylinder></geometry>
+        <material>
+          <ambient>0.72 0.36 0.20 1</ambient>
+          <diffuse>0.72 0.36 0.20 1</diffuse>
+          <specular>0.1 0.1 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <model name="plant_sw_foliage">
+    <static>true</static><pose>-6.2 -4.8 0.75 0 0 0</pose>
+    <link name="link">
+      <collision name="col">
+        <geometry><sphere><radius>0.32</radius></sphere></geometry>
+      </collision>
+      <visual name="vis">
+        <geometry><sphere><radius>0.32</radius></sphere></geometry>
+        <material>
+          <ambient>0.12 0.50 0.18 1</ambient>
+          <diffuse>0.12 0.50 0.18 1</diffuse>
+          <specular>0.05 0.12 0.05 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       EAST ROOM — kitchen / lab / workspace
+       ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- Dining table  (warm oak) -->
+  <model name="dining_table_top">
+    <static>true</static><pose>4.0 0 0.72 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>1.8 0.9 0.06</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>1.8 0.9 0.06</size></box></geometry>
+        <material>
+          <ambient>0.62 0.40 0.20 1</ambient>
+          <diffuse>0.62 0.40 0.20 1</diffuse>
+          <specular>0.3 0.22 0.10 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <model name="dining_table_legs">
+    <static>true</static><pose>4.0 0 0.34 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>1.6 0.75 0.68</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>1.6 0.75 0.68</size></box></geometry>
+        <material>
+          <ambient>0.45 0.28 0.12 1</ambient>
+          <diffuse>0.45 0.28 0.12 1</diffuse>
+          <specular>0.2 0.15 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Chair east  (sage green) -->
+  <model name="chair_east">
+    <static>true</static><pose>5.2 0 0.45 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.5 0.5 0.9</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.5 0.5 0.9</size></box></geometry>
+        <material>
+          <ambient>0.44 0.62 0.42 1</ambient>
+          <diffuse>0.44 0.62 0.42 1</diffuse>
+          <specular>0.1 0.15 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Chair west  (sage green) -->
+  <model name="chair_west">
+    <static>true</static><pose>2.8 0 0.45 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.5 0.5 0.9</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.5 0.5 0.9</size></box></geometry>
+        <material>
+          <ambient>0.44 0.62 0.42 1</ambient>
+          <diffuse>0.44 0.62 0.42 1</diffuse>
+          <specular>0.1 0.15 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Bookshelf  (dark walnut) -->
+  <model name="bookshelf">
+    <static>true</static><pose>6.6 -3.5 1.0 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.3 2.5 2.0</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.3 2.5 2.0</size></box></geometry>
+        <material>
+          <ambient>0.28 0.16 0.08 1</ambient>
+          <diffuse>0.28 0.16 0.08 1</diffuse>
+          <specular>0.2 0.15 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Coloured crate stack ── red, yellow, blue -->
+  <model name="crate_red">
+    <static>true</static><pose>3.5 -4.0 0.25 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.5 0.5 0.5</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.5 0.5 0.5</size></box></geometry>
+        <material>
+          <ambient>0.85 0.15 0.15 1</ambient>
+          <diffuse>0.85 0.15 0.15 1</diffuse>
+          <specular>0.3 0.1 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <model name="crate_yellow">
+    <static>true</static><pose>4.2 -4.0 0.25 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.5 0.5 0.5</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.5 0.5 0.5</size></box></geometry>
+        <material>
+          <ambient>0.95 0.82 0.10 1</ambient>
+          <diffuse>0.95 0.82 0.10 1</diffuse>
+          <specular>0.3 0.3 0.05 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <model name="crate_blue">
+    <static>true</static><pose>3.85 -4.0 0.75 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.5 0.5 0.5</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.5 0.5 0.5</size></box></geometry>
+        <material>
+          <ambient>0.15 0.35 0.82 1</ambient>
+          <diffuse>0.15 0.35 0.82 1</diffuse>
+          <specular>0.2 0.2 0.5 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Worktop counter  (light grey) -->
+  <model name="counter">
+    <static>true</static><pose>6.6 2.5 0.5 0 0 0</pose>
+    <link name="link">
+      <collision name="col"><geometry><box><size>0.6 2.5 1.0</size></box></geometry></collision>
+      <visual name="vis">
+        <geometry><box><size>0.6 2.5 1.0</size></box></geometry>
+        <material>
+          <ambient>0.82 0.82 0.80 1</ambient>
+          <diffuse>0.82 0.82 0.80 1</diffuse>
+          <specular>0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Round pillar  (terracotta accent) -->
+  <model name="pillar">
+    <static>true</static><pose>0.5 4.5 1.5 0 0 0</pose>
+    <link name="link">
+      <collision name="col">
+        <geometry><cylinder><radius>0.22</radius><length>3.0</length></cylinder></geometry>
+      </collision>
+      <visual name="vis">
+        <geometry><cylinder><radius>0.22</radius><length>3.0</length></cylinder></geometry>
+        <material>
+          <ambient>0.78 0.38 0.22 1</ambient>
+          <diffuse>0.78 0.38 0.22 1</diffuse>
+          <specular>0.2 0.12 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Small round table NE  (purple accent) -->
+  <model name="side_table">
+    <static>true</static><pose>5.5 4.5 0.45 0 0 0</pose>
+    <link name="link">
+      <collision name="col">
+        <geometry><cylinder><radius>0.4</radius><length>0.9</length></cylinder></geometry>
+      </collision>
+      <visual name="vis">
+        <geometry><cylinder><radius>0.4</radius><length>0.9</length></cylinder></geometry>
+        <material>
+          <ambient>0.50 0.20 0.65 1</ambient>
+          <diffuse>0.50 0.20 0.65 1</diffuse>
+          <specular>0.3 0.2 0.4 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+  <!-- Lamp on side table  (orange glow) -->
+  <!-- lamp shade kept as visual-only, no point light -->
+  <model name="lamp_shade">
+    <static>true</static><pose>5.5 4.5 1.15 0 0 0</pose>
+    <link name="link">
+      <visual name="vis">
+        <geometry><cylinder><radius>0.2</radius><length>0.35</length></cylinder></geometry>
+        <material>
+          <ambient>1.0 0.60 0.15 1</ambient>
+          <diffuse>1.0 0.60 0.15 1</diffuse>
+          <emissive>0.8 0.40 0.05 1</emissive>
+          <specular>0.2 0.2 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+</world>
+</sdf>
